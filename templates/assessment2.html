@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Behaviour Assessment</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-image: url('https://img.freepik.com/free-photo/3d-background-with-white-cubes_23-2150472996.jpg?semt=ais_hybrid'); /* Updated background image */
+    background-size: cover;
+    background-position: center center;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+        /* Form Container Styling */
+        .form-container {
+            background: rgba(255, 255, 255, 0.8); /* Slight transparency */
+            padding: 20px 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90%; /* Limit container height */
+            overflow-y: auto; /* Scrollable content if it exceeds max height */
+        }
+
+        /* Heading Styling */
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px; /* Larger font size */
+            margin-bottom: 20px; /* Space below heading */
+        }
+
+        /* Submit Button Styling */
+        input[type="submit"] {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Cognitive Behaviour Assessment</h1>
+        <form method="POST" action="{{ url_for('assessment2') }}">
+
+            <!-- Numbered Questions -->
+            <div class="form-group">
+                <label for="Q1">1. Do you often feel overwhelmed with tasks and responsibilities?</label>
+                <select name="Q1" id="Q1" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q2">2. How often do you experience difficulty concentrating?</label>
+                <select name="Q2" id="Q2" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q3">3. Do you struggle with making decisions, even small ones?</label>
+                <select name="Q3" id="Q3" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q4">4. Do you find yourself feeling disconnected from people around you?</label>
+                <select name="Q4" id="Q4" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q5">5. How often do you have trouble sleeping due to racing thoughts?</label>
+                <select name="Q5" id="Q5" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q6">6. Do you often doubt your abilities or feel inadequate?</label>
+                <select name="Q6" id="Q6" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q7">7. Do you experience frequent mood swings?</label>
+                <select name="Q7" id="Q7" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q8">8. Do you avoid social interactions due to fear of judgment?</label>
+                <select name="Q8" id="Q8" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q9">9. Do you feel fatigued or drained despite adequate rest?</label>
+                <select name="Q9" id="Q9" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Q10">10. Do you often replay negative thoughts or scenarios in your mind?</label>
+                <select name="Q10" id="Q10" class="form-control" required>
+                    <option value="1">Never</option>
+                    <option value="2">Rarely</option>
+                    <option value="3">Sometimes</option>
+                    <option value="4">Often</option>
+                    <option value="5">Always</option>
+                </select>
+            </div>
+
+            <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

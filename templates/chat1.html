@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Chatbot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJp3Z0fJ7z4c5b6e6ON1lgP6XALhQbsXr+TOSJggZnQyL7YNbzpUzt1/3+gg" crossorigin="anonymous">
+    <style>
+       body {
+    font-family: 'Arial', sans-serif;
+    background-image: url('https://img.freepik.com/premium-photo/light-blue-abstract-digital-projects-dark-background-background-design_1020697-413290.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}
+
+
+.sidebar {
+    background-color: rgba(128, 128, 128, 0.5); /* Semi-transparent grey */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 220px;
+    height: 100%;
+    padding: 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    backdrop-filter: blur(5px); /* Apply grey blur effect */
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px; /* Smaller font size */
+    padding: 8px 12px; /* Smaller padding */
+    background-color: #66b3ff;
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: #3399ff;
+    color: white;
+}
+
+        .chat-container {
+    background-color: #eff4f5; /* Darker light blue background */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    margin: auto;
+}
+
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .chat-header img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .profile-link,
+        .dashboard-link {
+            font-size: 14px;
+            padding: 8px 15px;
+            border: none;
+            background-color: #66b3ff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-link img,
+        .dashboard-link img {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+
+        .profile-link:hover,
+        .dashboard-link:hover {
+            background-color: #3399ff;
+        }
+        .chat-box {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #e6f7ff; /* Very light blue background */
+    border-radius: 8px;
+    border: 1px solid #e1e1e1;
+}
+
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin: 10px 0;
+        }
+
+        .message-content {
+            background-color: #66b3ff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .bot-message .message-content {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .user-message .message-content {
+            background-color: #3399ff;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e1e1e1;
+            padding-top: 10px;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #66b3ff;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #66b3ff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #3399ff;
+        }
+
+        .logout-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 6px 12px; /* Further reduced padding */
+            background-color: #ff6666;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px; /* Smaller font size */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #ff4d4d;
+        }
+
+        .bottom-buttons {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bottom-buttons button {
+            padding: 10px 18px;  
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px; 
+            cursor: pointer;
+        }
+
+        .bottom-buttons button:nth-child(1) {
+            background-color: #ff6666;
+        }
+
+        .bottom-buttons button:nth-child(2) {
+            background-color: #66b3ff;
+        }
+
+        .bottom-buttons button:nth-child(1):hover {
+            background-color: #ff4d4d;
+        }
+
+        .bottom-buttons button:nth-child(2):hover {
+            background-color: #3399ff;
+        }
+        
+
+        .popup-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px; /* Add margin to space it from the text box */
+            flex-wrap: wrap; /* Allows items to wrap if necessary */
+        }
+
+        .popup-text {
+            background-color:  #66b3ff;
+    color: white;
+    padding: 8px 12px; /* Slightly smaller padding */
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px; /* Smaller font size */
+    text-align: center;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.popup-text:hover {
+    background-color: #80b3ff; /* Darker color on hover */
+    transform: scale(1.05); /* Slightly enlarge the button on hover */
+}
+
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #66b3ff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3399ff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <a href="{{ url_for('profile') }}" class="btn btn-primary btn-block">View Profile</a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-info btn-block">Dashboard</a>
+        <a href="{{ url_for('guidelines') }}" class="btn btn-success btn-block">Mental Health Assessment</a>
+        <a href="{{ url_for('daily_tasks') }}" class="btn btn-warning btn-block">Daily Tasks</a>
+        <a href="{{ url_for('suggestions') }}" class="btn btn-danger btn-block">Suggestions</a>
+        <a href="{{ url_for('community') }}" class="btn btn-secondary btn-block">Mindo Community</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    
+    
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div style="display: flex; align-items: center;">
+                <img src="https://t4.ftcdn.net/jpg/04/21/38/37/360_F_421383729_XSnMHrKGQKPge4eXUXZTIaas50HzEZdb.jpg" alt="Logo">
+                Mindo
+            </div>
+        </div>
+
+        <div id="chat-box" class="chat-box">
+            <div class="message bot-message">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCh2mPp5DnsSsDTUFRNrk2KOROxeBVSEX5g&s" alt="Bot" class="avatar">
+                <div class="message-content">Hi! How are you feeling today?</div>
+            </div>
+        </div>
+
+         <!-- Predefined messages (Pop-up Text) in horizontal order -->
+         <div class="popup-container">
+            <div class="popup-text" onclick="copyText('I feel anxious and overwhelmed.')">I feel anxious and overwhelmed.</div>
+            <div class="popup-text" onclick="copyText('I am feeling sad and lonely.')">I am feeling sad and lonely.</div>
+            <div class="popup-text" onclick="copyText('I am doing well, thank you!')">I am doing well, thank you!</div>
+            <div class="popup-text" onclick="copyText('I am feeling hopeful today.')">I am feeling hopeful today.</div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="user-msg" placeholder="Share Your Thoughts Freely...." autocomplete="off">
+            <button id="mic-button" onclick="startListening()" style="background: none; border: none; padding: 0;">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRY5n71or6mM4iTqihrbi7eJueaD34g1N0jZA&s" alt="Mic Icon" style="width: 24px; height: 24px;">
+            </button>
+            <button onclick="sendMessage()" style="background: none; border: none; padding: 0;">
+                <img src="https://t3.ftcdn.net/jpg/02/93/72/48/360_F_293724835_LqDz77Sl5zGWOU5eEcPYMM99qeBiiaiu.jpg" alt="Send Icon" style="width: 40px; height: 40px;">
+            </button>
+            <!-- Upload button with new upload icon -->
+    <button onclick="window.location.href='/upload';" style="background: none; border: none; padding: 0;">
+        <img src="https://thumbs.dreamstime.com/b/file-upload-line-vector-icon-elements-mobile-concept-web-apps-thin-icons-website-design-development-app-premium-104426160.jpg" alt="Upload Icon" style="width: 36px; height: 36px;">
+    </button>
+        </div>
+        
+        
+        <div class="bottom-buttons">
+            <button onclick="window.location.href = '{{ url_for('emergency') }}';">Emergency Assistance</button>
+            <button onclick="window.location.href = '{{ url_for('feedback') }}';">Provide Feedback</button>
+        </div>
+        
+        <button class="logout-button" onclick="logout()">Logout</button>
+        
+        <script>
+            function sendMessage() {
+                const msg = document.getElementById("user-msg").value.trim();
+                if (!msg) return;
+        
+                const chatBox = document.getElementById("chat-box");
+        
+                // Display the user's message
+                const userMessage = document.createElement("div");
+                userMessage.classList.add("message", "user-message");
+                userMessage.innerHTML = ` 
+                    <img src="https://t4.ftcdn.net/jpg/07/67/39/37/360_F_767393773_ku3EXghSvq8oCHjWcxHRrKCiHwXRFr9l.jpg" alt="User" class="avatar">
+                    <div class="message-content">${msg}</div>
+                `;
+                chatBox.appendChild(userMessage);
+                chatBox.scrollTop = chatBox.scrollHeight;
+        
+                // Send the message to the server
+                fetch("{{ url_for('chat') }}", {
+                    method: "POST",
+                    body: new URLSearchParams({ "msg": msg }),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.response) {
+                        const botMessage = document.createElement("div");
+                        botMessage.classList.add("message", "bot-message");
+                        botMessage.innerHTML = `
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlCh2mPp5DnsSsDTUFRNrk2KOROxeBVSEX5g&s" alt="Bot" class="avatar">
+                            <div class="message-content">${data.response}</div>
+                        `;
+                        chatBox.appendChild(botMessage);
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                });
+        
+                document.getElementById("user-msg").value = "";
+            }
+        
+            function startListening() {
+                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = 'en-US';
+        
+                recognition.onresult = (event) => {
+                    document.getElementById("user-msg").value = event.results[0][0].transcript;
+                };
+        
+                recognition.start();
+            }
+        
+            function logout() {
+                // Perform logout action (e.g., redirect to login page or clear session)
+                window.location.href = "/logout"; // Replace with your logout route
+            }
+
+            function copyText(predefinedText) {
+            document.getElementById("user-msg").value = predefinedText;
+        }
+        </script>
+    </body>
+
+    </html>
+    

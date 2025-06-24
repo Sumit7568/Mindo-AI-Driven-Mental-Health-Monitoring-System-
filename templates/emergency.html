@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Assistance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #F9F9F9;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #E00000;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .alert {
+            background-color: #FFE5E5;
+            color: #C21807;
+            padding: 20px;
+            margin: 20px auto;
+            border: 2px solid #E00000;
+            border-radius: 5px;
+            max-width: 600px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .alert strong {
+            font-weight: bold;
+        }
+        .contact-info {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .contact-info p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .contact-info a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #FF4D4D;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 10px 5px 0 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .contact-info a:hover {
+            background-color: #E00000;
+            transform: translateY(-2px);
+        }
+        .emergency-button {
+            margin-top: 20px;
+        }
+        .emergency-button button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            color: white;
+            background-color: #E00000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .emergency-button button:hover {
+            background-color: #C21807;
+            transform: translateY(-2px);
+        }
+        .navigation-buttons {
+            margin-top: 30px;
+        }
+        .navigation-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .navigation-buttons a:hover {
+            background-color: #0056B3;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Alert Message -->
+    <div class="alert">
+        <strong>Urgent Attention Required:</strong> If you are feeling overwhelmed, having suicidal thoughts, or experiencing severe mental health distress, please seek immediate help. 
+        <br><br>
+        Contact local emergency services or dial 911 if your condition feels life-threatening. Remember, you are not alone, and help is available.
+    </div>
+
+    <!-- Header -->
+    <h1>Emergency Assistance</h1>
+
+    <!-- Emergency Button -->
+    <div class="emergency-button">
+        <button onclick="sendEmergencyAlert()">Send Emergency Alert</button>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="contact-info">
+        <p><strong>Psychiatrist 1:</strong> {{ contacts['Psychiatrist 1'] }}</p>
+        <p><strong>Psychiatrist 2:</strong> {{ contacts['Psychiatrist 2'] }}</p>
+        <a href="tel:{{ contacts['Psychiatrist 1'] }}">Call Psychiatrist 1</a>
+        <a href="tel:{{ contacts['Psychiatrist 2'] }}">Call Psychiatrist 2</a>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="navigation-buttons">
+        <a href="{{ url_for('index') }}">Go to Chat</a>
+        <a href="{{ url_for('home') }}">Back</a>
+    </div>
+
+    <script>
+        function sendEmergencyAlert() {
+            // Send a request to the backend
+            fetch('/send-emergency-alert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: 'Emergency alert triggered by a patient. Immediate assistance required!',
+                }),
+            })
+            .then((response) => {
+                if (response.ok) {
+                    alert('Emergency alert sent successfully!');
+                } else {
+                    alert('Failed to send the emergency alert. Please try again.');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>

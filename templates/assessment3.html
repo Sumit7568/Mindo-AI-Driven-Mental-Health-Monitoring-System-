@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Well Being Assessment</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: url('https://img.freepik.com/free-photo/3d-background-with-white-cubes_23-2150472996.jpg?semt=ais_hybrid');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 700px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin: 15px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .image-option {
+            position: relative;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .image-option img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-option input {
+            display: none;
+        }
+
+        .image-option input:checked + img {
+            transform: scale(1.05);
+            border: 2px solid #007bff;
+            border-radius: 8px;
+        }
+
+        input[type="submit"] {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Emotional Well Being Assessment</h1>
+        <form method="POST" action="{{ url_for('assessment3') }}">
+            <p>Please select the image(s) that resonate with how you're currently feeling for each question below:</p>
+
+            <!-- Question 1 -->
+            <div class="form-group">
+                <label><strong>1. Which image best describes your current mood?</strong></label>
+                <div class="image-grid">
+                    <label class="image-option">
+                        <input type="radio" name="Q1" value="happy" required>
+                        <img src="https://rachelziv.com.au/wp-content/uploads/2020/01/happy.jpg" alt="Happy">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q1" value="sad">
+                        <img src="https://static.vecteezy.com/system/resources/thumbnails/031/588/507/small_2x/loneliness-and-heartbreak-a-poignant-exploration-of-emotional-vulnerability-and-solitude-ai-generated-photo.jpg" alt="Sad">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q1" value="angry">
+                        <img src="https://static-00.iconduck.com/assets.00/angry-face-emoji-1024x986-b1p82e6w.png" alt="Angry">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q1" value="calm">
+                        <img src="https://icsblog.s3.ap-south-1.amazonaws.com/blog/wp-content/uploads/2023/06/14213714/main-qimg-25f4643b028b1ce78ecb3dff11d02ae9-lq.jpeg" alt="Calm">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="form-group">
+                <label><strong>2. Which image reflects your energy level?</strong></label>
+                <div class="image-grid">
+                    <label class="image-option">
+                        <input type="radio" name="Q2" value="high_energy" required>
+                        <img src="https://fullfocus.co/wp-content/uploads/2016/07/iStock_73128267_MEDIUM.jpg" alt="High Energy">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q2" value="low_energy">
+                        <img src="https://invitationtohealth.com.au/wp-content/uploads/2016/05/Screen-Shot-2016-05-11-at-8.44.05-pm.png" alt="Low Energy">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q2" value="balanced">
+                        <img src="https://cdn2.psychologytoday.com/assets/styles/manual_crop_4_3_1200x900/public/field_blog_entry_teaser_image/2018-09/the_best_way_to_find_balance_in_life.jpg?itok=lisuqz15" alt="Balanced">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q2" value="exhausted">
+                        <img src="https://emi.parkview.com/media/Image/Dashboard_835_tired_person_3_23.jpg" alt="Exhausted">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="form-group">
+                <label><strong>3. Which image represents your state of mind?</strong></label>
+                <div class="image-grid">
+                    <label class="image-option">
+                        <input type="radio" name="Q3" value="clear_mind" required>
+                        <img src="https://www.lean.org/wp-content/uploads/2020/04/22_large.jpg" alt="Clear Mind">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q3" value="cloudy">
+                        <img src="https://c0.wallpaperflare.com/preview/885/40/954/selective-focus-photography-of-man-under-cloudy-sky.jpg" alt="Cloudy">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q3" value="chaotic">
+                        <img src="https://www.shutterstock.com/image-photo/stress-chaos-business-man-headache-600nw-2450798505.jpg" alt="Chaotic">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q3" value="focused">
+                        <img src="https://www.shutterstock.com/image-photo/view-concentrated-talented-skilled-male-260nw-767469670.jpg" alt="Focused">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="form-group">
+                <label><strong>4. Which image represents your level of social interaction?</strong></label>
+                <div class="image-grid">
+                    <label class="image-option">
+                        <input type="radio" name="Q4" value="connected" required>
+                        <img src="https://www.shutterstock.com/shutterstock/photos/1532068016/display_1500/stock-photo-unity-and-diversity-partnership-as-heart-hands-in-a-group-of-diverse-people-connected-together-1532068016.jpg" alt="Connected">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q4" value="isolated">
+                        <img src="https://hips.hearstapps.com/hmg-prod/images/rear-view-of-man-on-footbridge-against-sky-royalty-free-image-887479208-1549376558.jpg" alt="Isolated">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q4" value="neutral">
+                        <img src="https://c8.alamy.com/comp/R1ER6R/portrait-of-a-attractive-mature-man-looking-neutral-relaxed-and-serious-in-facial-expressions-human-emotions-isolated-on-grey-blue-background-R1ER6R.jpg" alt="Neutral">
+                    </label>
+                    <label class="image-option">
+                        <input type="radio" name="Q4" value="social_butterfly">
+                        <img src="https://media.licdn.com/dms/image/C5616AQF4ay9ve_UyCA/profile-displayphoto-shrink_800_800/0/1607681603029?e=1678320000&v=beta&t=Ll8pKw8m01fNWf2gQvUkwEHWGosUj4Lxki5zHMGmIxs" alt="Social Butterfly">
+                    </label>
+                </div>
+            </div>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provide Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #F9F9F9;
+            padding: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .feedback-form {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .feedback-form textarea {
+            width: 100%;
+            padding: 10px;
+            height: 150px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .feedback-form button, .chat-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .feedback-form button:hover, .chat-button:hover {
+            background-color: #388E3C;
+            transform: translateY(-2px);
+        }
+        .chat-button {
+            background-color: #007BFF;
+        }
+        .chat-button:hover {
+            background-color: #0056B3;
+        }
+    </style>
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault(); // Prevent default form submission
+            alert('Your feedback has been submitted. Thank you!');
+            document.getElementById('feedback-form').reset(); // Clear the form after submission
+        }
+    </script>
+</head>
+<body>
+    <h1>Provide Feedback</h1>
+    <div class="feedback-form">
+        <form id="feedback-form" onsubmit="handleSubmit(event)">
+            <textarea name="feedback" placeholder="Write your feedback here..." required></textarea><br>
+            <div class="button-container">
+                <button type="submit">Submit Feedback</button>
+                <a href="{{ url_for('index') }}" class="chat-button">Go to Chat</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

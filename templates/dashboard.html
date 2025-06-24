@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* General styling for level circles */
+.level-circle {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+/* Styling for the text before the circle */
+.level-text {
+    margin-right: 10px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+/* Color classes based on level */
+.level-circle[data-level="Low"] {
+    background-color: #4dff4d; /* Green for Low */
+}
+
+.level-circle[data-level="Moderate"] {
+    background-color: #ffcc00; /* Yellow for Moderate */
+}
+
+.level-circle[data-level="High"] {
+    background-color: #ff4d4d; /* Red for High */
+}
+
+          .most-common-issues {
+            margin-bottom: 20px; /* Adds space below the Most Common Issues section */
+        }
+
+        .overall-evaluation {
+            margin-top: 20px; /* Adds space above the Overall Evaluation section */
+        }
+       /* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #e0f7fa; /* Light blue background */
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 2px solid #0056B3;
+            font-size: 1.2em;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 1100px;
+            margin: 15px auto;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .profile-info, .activity-log, .mental-health, .mindo-community, .daily-task-status {
+            background-color: #FFF;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            flex: 1 1 calc(50% - 10px);
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            color: #0056B3;
+            margin-bottom: 8px;
+        }
+
+        p, ul {
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .activity-log ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .activity-log ul li {
+            padding: 8px;
+            background-color: #F4F8FB;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .activity-log ul li span {
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        /* Button Group Style */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .button-group a {
+            display: inline-block;
+            padding: 10px 18px;
+            font-size: 0.9em;
+            text-decoration: none;
+            border-radius: 4px;
+            text-align: center;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .chat-button {
+            background-color: #007BFF;
+        }
+
+        .chat-button:hover {
+            background-color: #0056B3;
+        }
+
+        .logout-button {
+            background-color: #6C757D;
+        }
+
+        .logout-button:hover {
+            background-color: #495057;
+        }
+
+        .footer {
+            background-color: #0056B3;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.8em;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 8px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .profile-info, .activity-log, .mental-health, .mindo-community, .daily-task-status {
+                flex: 1 1 100%;
+            }
+        }
+
+        /* Layout for Mental Health Domains */
+        .mental-health-status-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .mental-health-status-container > div {
+            flex: 1 1 22%;
+        }
+
+        .mental-health-status-container h3 {
+            margin-bottom: 8px;
+        }
+
+        /* Styling for the Mental Health Status Title */
+        .mental-health-status-title {
+            text-align: center;
+            font-size: 1.3em;
+            color: #007BFF;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+        }
+
+        th, td {
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f4f8fb;
+        }
+
+        td {
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome, {{ user_data.name }}!</h1>
+    </header>
+
+    <div class="container">
+        <!-- Profile Information Section -->
+        <div class="profile-info">
+            <h2>Your Profile Information</h2>
+            <p><strong>Email:</strong> {{ user_data.email }}</p>
+            <p><strong>Gender:</strong> {{ user_data.gender or 'N/A' }}</p>
+            <p><strong>Age:</strong> {{ user_data.age or 'N/A' }}</p>
+            <p><strong>Profession:</strong> {{ user_data.profession or 'N/A' }}</p>
+        </div>
+
+        <!-- Activity Log Section -->
+        <div class="activity-log">
+            <h2>Activity Log</h2>
+            <ul>
+                {% for entry in activity %}
+                    <li>
+                        <span>{{ entry.date }}</span>
+                        {{ entry.action }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Daily Task Status Section -->
+        <div class="daily-task-status">
+            <h2>Daily Task Status</h2>
+            <h3>Completed Daily Tasks</h3>
+            {% if completed_tasks %}
+                <ul>
+                    {% for task in completed_tasks %}
+                        <li>{{ task }}: Completed</li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Submitted On:</strong> {{ timestamp }}</p>
+            {% else %}
+                <p>No daily tasks submitted yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Mindo Community Section -->
+        <div class="mindo-community">
+            <h2>Mindo Community</h2>
+            <h3>Joined Tasks</h3>
+            {% if joined_tasks %}
+                <ul>
+                    {% for task in joined_tasks %}
+                        <li>
+                            <strong>Task:</strong> {{ task.task }} <br>
+                            <strong>Organized by:</strong> {{ task.organization }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>You have not joined any tasks yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mental Health Status Section -->
+    <div class="mental-health-status-title">
+        <h2>Mental Health Status</h2>
+    </div>
+
+    <div class="mental-health-status-container">
+        <!-- Mental Health Disorder -->
+        <div class="mental-health">
+            <h3>Mental Health Disorder Status</h3>
+            <p>
+                <strong>Depression Level:</strong> 
+                <span class="level-text">{{ analysis["depression"] }}</span>
+                <span class="level-circle" data-level="{{ analysis['depression'] }}"></span>
+            </p>
+            <p>
+                <strong>Anxiety Level:</strong> 
+                <span class="level-text">{{ analysis["anxiety"] }}</span>
+                <span class="level-circle" data-level="{{ analysis['anxiety'] }}"></span>
+            </p>
+            <p>
+                <strong>Anger Level:</strong> 
+                <span class="level-text">{{ analysis["anger"] }}</span>
+                <span class="level-circle" data-level="{{ analysis['anger'] }}"></span>
+            </p>
+            <p>
+                <strong>Loneliness Level:</strong> 
+                <span class="level-text">{{ analysis["loneliness"] }}</span>
+                <span class="level-circle" data-level="{{ analysis['loneliness'] }}"></span>
+            </p>
+        </div>
+        <!-- Cognitive Status -->
+        <div class="mental-health">
+            <h3>Cognitive Status</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Cognitive Score</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if cognitive_data %}
+                        <tr>
+                            <td>{{ cognitive_data['timestamp'] }}</td>
+                            <td>{{ cognitive_data['cognitive_function_score'] }}</td>
+                            <td>{{ cognitive_status }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">No cognitive data available.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Emotion Well-being Status -->
+<div class="emotion-well-being">
+    <h3>Emotion Well-being Status</h3>
+    {% if emotional_analysis %}
+        <p><strong>Happiness Level:</strong> 
+            {{ emotional_analysis['happiness'] }} 
+            <span class="level-circle" data-level="{{ emotional_analysis['happiness'] }}"></span>
+        </p>
+        <p><strong>Sadness Level:</strong> 
+            {{ emotional_analysis['sadness'] }} 
+            <span class="level-circle" data-level="{{ emotional_analysis['sadness'] }}"></span>
+        </p>
+        <p><strong>Fear Level:</strong> 
+            {{ emotional_analysis['fear'] }} 
+            <span class="level-circle" data-level="{{ emotional_analysis['fear'] }}"></span>
+        </p>
+        <p><strong>Confidence Level:</strong> 
+            {{ emotional_analysis['confidence'] }} 
+            <span class="level-circle" data-level="{{ emotional_analysis['confidence'] }}"></span>
+        </p>
+    {% else %}
+        <p>No emotional analysis available.</p>
+    {% endif %}
+</div>
+
+
+        <!-- Most Common Issues -->
+        <div class="most-common-issues">
+            <h3>Most Common Issues</h3>
+            <ul>
+                {% if common_issues %}
+                    {% for issue in common_issues %}
+                        <li>{{ issue }}</li>
+                    {% endfor %}
+                {% else %}
+                    <li>No common issues reported.</li>
+                {% endif %}
+            </ul>
+            <div class="overall-evaluation">
+                <h4>Social Diagnostics</h4>
+                {% if overall_evaluation %}
+                    <p>Overall Mental State: {{ overall_evaluation.overall_state }}</p>
+                {% else %}
+                    <p>No evaluation available for this user.</p>
+                {% endif %}
+            </div>
+            
+            
+        </div>
+        
+    </div>
+
+    <!-- Button Section -->
+    <div class="button-group">
+        <a href="{{ url_for('index') }}" class="chat-button">Go to Chat</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Mindo Community | All Rights Reserved</p>
+    </footer>
+</body>
+</html>

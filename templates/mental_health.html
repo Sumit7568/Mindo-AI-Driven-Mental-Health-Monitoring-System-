@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Disorder Assessment</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa; /* Fallback color */
+            background-image: url('https://img.freepik.com/free-photo/3d-background-with-white-cubes_23-2150472996.jpg?semt=ais_hybrid'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .form-container {
+            background-color: #ffffff; /* White background for the form */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            margin-top: 50px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+
+        label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555555;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px; /* Space between options */
+            margin-top: 5px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        input[type="submit"] {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007bff; /* Blue color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none; /* Ensures the button looks like a button */
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9; /* Light background for each question */
+            border-radius: 5px;
+        }
+
+        .question:nth-child(even) {
+            background-color: #f1f1f1; /* Slightly different shade for alternating questions */
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Mental Health Disorder Assessment</h1>
+        <form method="POST" action="{{ url_for('mental_health') }}">
+
+            <!-- Mood Question -->
+            <div class="question">
+                <label for="Q1">1. How are you feeling today?</label>
+                <div class="options">
+                    <label><input type="radio" id="happy" name="Q1" value="Happy" required> Happy</label>
+                    <label><input type="radio" id="sad" name="Q1" value="Sad"> Sad</label>
+                    <label><input type="radio" id="neutral" name="Q1" value="Neutral"> Neutral</label>
+                </div>
+            </div>
+
+            <!-- Stress Level Question -->
+            <div class="question">
+                <label for="Q2">2. What is your current stress level?</label>
+                <div class="options">
+                    <label><input type="radio" id="low" name="Q2" value="Low" required> Low</label>
+                    <label><input type="radio" id="moderate" name="Q2" value="Moderate"> Moderate</label>
+                    <label><input type="radio" id="high" name="Q2" value="High"> High</label>
+                </div>
+            </div>
+
+            <!-- Work Stress Question -->
+            <div class="question">
+                <label for="Q3">3. How stressed do you feel about work?</label>
+                <div class="options">
+                    <label><input type="radio" id="low_work" name="Q3" value="Low" required> Low</label>
+                    <label><input type="radio" id="moderate_work" name="Q3" value="Moderate"> Moderate</label>
+                    <label><input type="radio" id="high_work" name="Q3" value="High"> High</label>
+                </div>
+            </div>
+
+            <!-- Career Satisfaction Question -->
+            <div class="question">
+                <label for="Q4">4. How satisfied are you with your career?</label>
+                <div class="options">
+                    <label><input type="radio" id="very_satisfied" name="Q4" value="Very Satisfied" required> Very Satisfied</label>
+                    <label><input type="radio" id="satisfied" name="Q4" value="Satisfied"> Satisfied</label>
+                    <label><input type="radio" id="dissatisfied" name="Q4" value="Dissatisfied"> Dissatisfied</label>
+                </div>
+            </div>
+
+            <!-- Sleep Quality Question -->
+            <div class="question">
+                <label for="Q5">5. How would you rate your sleep quality?</label>
+                <div class="options">
+                    <label><input type="radio" id="good_sleep" name="Q5" value="Good" required> Good</label>
+                    <label><input type="radio" id="average_sleep" name="Q5" value="Average"> Average</label>
+                    <label><input type="radio" id="poor_sleep" name="Q5" value="Poor"> Poor</label>
+                </div>
+            </div>
+
+            <!-- Anxiety Level Question -->
+            <div class="question">
+                <label for="Q6">6. Do you feel anxious frequently?</label>
+                <div class="options">
+                    <label><input type="radio" id="no_anxiety" name="Q6" value="No" required> No</label>
+                    <label><input type="radio" id="yes_anxiety" name="Q6" value="Yes"> Yes</label>
+                </div>
+            </div>
+
+            <!-- Depression Symptoms Question -->
+            <div class="question">
+                <label for="Q7">7. Do you experience symptoms of depression?</label>
+                <div class="options">
+                    <label><input type="radio" id="no_depression" name="Q7" value="No" required> No</label>
+                    <label><input type="radio" id="yes_depression" name="Q7" value="Yes"> Yes</label>
+                </div>
+            </div>
+
+            <!-- Feeling of Isolation Question -->
+            <div class="question">
+                <label for="Q8">8. Do you feel isolated or disconnected?</label>
+                <div class="options">
+                    <label><input type="radio" id="no_isolation" name="Q8" value="No" required> No</label>
+                    <label><input type="radio" id="yes_isolation" name="Q8" value="Yes"> Yes</label>
+                </div>
+            </div>
+
+            <!-- Self-esteem Question -->
+            <div class="question">
+                <label for="Q9">9. How would you rate your self-esteem?</label>
+                <div class="options">
+                    <label><input type="radio" id="high_self_esteem" name="Q9" value="High" required> High</label>
+                    <label><input type="radio" id="average_self_esteem" name="Q9" value="Average"> Average</label>
+                    <label><input type="radio" id="low_self_esteem" name="Q9" value="Low"> Low</label>
+                </div>
+            </div>
+
+            <!-- Motivation Level Question -->
+            <div class="question">
+                <label for="Q10">10. How would you rate your motivation level?</label>
+                <div class="options">
+                    <label><input type="radio" id="high_motivation" name="Q10" value="High" required> High</label>
+                    <label><input type="radio" id="average_motivation" name="Q10" value="Average"> Average</label>
+                    <label><input type="radio" id="low_motivation" name="Q10" value="Low"> Low</label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="button-container">
+                <input type="submit" value="Submit" class="btn btn-primary">
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

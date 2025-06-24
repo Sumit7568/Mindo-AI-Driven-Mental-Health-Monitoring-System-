@@ -1,0 +1,14 @@
+Mental Health Report for John Doe
+Generated on: 2024-12-07 18:00:17
+========================================
+Gender: Male
+Age: 25
+Profession: Software Engineer
+
+Depression Level: High Risk of Depression
+Anxiety Level: Low Risk of Anxiety
+Anger Level: Low Risk of Anger
+
+Suggestions:
+- Seek professional help immediately.
+- Practice mindfulness or meditation.

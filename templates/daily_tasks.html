@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Tasks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F9FAFB;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20210923/pngtree-health-care-cartoon-style-light-and-shadow-background-image_904163.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        h1 {
+            color: #007BFF;
+            margin-top: 30px;
+        }
+
+        .task-container {
+            width: 50%;
+            margin: 20px auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            color: #333;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .message {
+            margin: 20px;
+            color: #28A745;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #DC3545;
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .buttons button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .buttons .submit-btn {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .buttons .chat-btn {
+            background-color: #28A745;
+            color: white;
+        }
+
+        .time-slot {
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+    <h1>Daily Tasks</h1>
+
+    {% if message %}
+        <div class="message {% if 'already' in message %}error{% endif %}">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('daily_tasks') }}">
+        <div class="task-container">
+            {% for task, description in tasks %}
+                <div class="time-slot">
+                    {% if loop.index <= 7 %}
+                        Morning Tasks (6 AM - 12 PM):
+                    {% elif loop.index <= 14 %}
+                        Afternoon/Night Tasks (12 PM - 10 PM):
+                    {% endif %}
+                </div>
+                <ul>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="{{ task }}"> {{ loop.index }}. {{ description }}
+                        </label>
+                    </li>
+                </ul>
+            {% endfor %}
+        </div>
+
+        <div class="buttons">
+            <button type="submit" class="submit-btn">Submit</button>
+            <a href="{{ url_for('index') }}">
+                <button type="button" class="chat-btn">Go to Chat</button>
+            </a>
+        </div>
+    </form>
+</body>
+</html>

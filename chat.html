@@ -1,0 +1,142 @@
+<?php
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    header('Location: index.php'); // Redirect to login page if not logged in
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Monitoring System - Chat</title>
+    <style>
+        /* CSS styling for the chat page */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        header h1 {
+            font-size: 2em;
+        }
+
+        header p {
+            font-size: 1.2em;
+        }
+
+        #chatbot {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .chat-window {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #fff;
+            margin-bottom: 10px;
+        }
+
+        #user-input {
+            padding: 10px;
+            width: 80%;
+            margin-right: 5px;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header section -->
+    <header>
+        <h1>Mental Health Monitoring System</h1>
+        <p>Interact with our chatbot for mental health support.</p>
+    </header>
+    
+    <!-- Chatbot section -->
+    <section id="chatbot">
+        <h2>Chat with Our Bot</h2>
+        <div class="chat-window" id="chat-window">
+            <p>Bot: Hello! How can I assist you today?</p>
+        </div>
+        <input type="text" placeholder="Type your message..." id="user-input">
+        <button onclick="sendMessage()">Send</button>
+    </section>
+
+    <footer>
+        <p>© 2024 Mental Health Monitoring System. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript functionality to handle chat interactions -->
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const chatWindow = document.getElementById('chat-window');
+
+            if (userInput.value.trim() !== "") {
+                // Display the user's message
+                const userMessage = document.createElement('p');
+                userMessage.textContent = `You: ${userInput.value}`;
+                chatWindow.appendChild(userMessage);
+
+                // Send the message to the PHP backend
+                const response = await fetch("chat1.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `msg=${encodeURIComponent(userInput.value)}`
+                });
+
+                // Get the bot's response and display it
+                const botMessageText = await response.text();
+                const botMessage = document.createElement('p');
+                botMessage.textContent = `Bot: ${botMessageText}`;
+                chatWindow.appendChild(botMessage);
+
+                // Clear input and scroll to the latest message
+                userInput.value = "";
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
