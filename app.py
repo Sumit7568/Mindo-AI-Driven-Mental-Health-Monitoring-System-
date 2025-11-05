@@ -6,13 +6,14 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from flask_socketio import join_room, leave_room, send, SocketIO
 from mysql.connector.errors import IntegrityError
 import mysql.connector
-import google.generativeai as ai
 from werkzeug.utils import secure_filename
 from PIL import Image
 from io import BytesIO
 from dotenv import load_dotenv
 import tensorflow as tf
 import requests
+import google.generativeai as genai
+
 
 # Initialize Flask app and SocketIO
 app = Flask(__name__)
@@ -34,8 +35,11 @@ def get_db_connection():
 # Retrieve API key from environment variable
 API_KEY = os.getenv('GOOGLE_API_KEY')
 
-# Configure the API
-ai.configure(api_key=API_KEY)
+
+genai.configure(api_key=API_KEY)
+
+# Create model object once
+model = genai.GenerativeModel("gemini-2.0-flash")  # ✅ latest supported text model
 
 # Chat application variables
 rooms = {}
@@ -1156,49 +1160,68 @@ def index():
         return redirect(url_for("login"))
     return render_template("chat1.html")
 
+# ✅ Gemini Response Function (text + image support)
+def get_gemini_response(input_text, image=None):
+    try:
+        model = genai.GenerativeModel("gemini-2.0-flash")  # ✅ stable & available model
 
-# Function to get response from Gemini
-def get_gemini_response(input_text, image):
-    model = ai.GenerativeModel("gemini-1.5-flash")
-    if input_text != "":
-        response = model.generate_content([input_text, image])  # Sending image directly as PIL Image
-    else:
-        response = model.generate_content(image)  # Sending image directly as PIL Image
-    return response.text
+        if image:
+            # Convert PIL Image to byte array
+            img_byte_arr = BytesIO()
+            image.save(img_byte_arr, format="JPEG")
+            img_byte_arr.seek(0)
 
+            # Combine image + text in the request
+            contents = [
+                {"role": "user", "parts": [
+                    {"text": input_text},
+                    {"inline_data": {"mime_type": "image/jpeg", "data": img_byte_arr.read()}}
+                ]}
+            ]
+            response = model.generate_content(contents)
+        else:
+            response = model.generate_content(input_text)
+
+        return response.text or "No response from model."
+
+    except Exception as e:
+        print("Gemini error:", e)
+        return "Sorry, I couldn’t process your request."
+
+
+# ✅ Upload Route (text + image)
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     response = None
     if request.method == "POST":
-        input_text = request.form["input"]
-        uploaded_file = request.files["image"]
-        
+        input_text = request.form.get("input", "")
+        uploaded_file = request.files.get("image")
+
         if uploaded_file:
-            image = Image.open(uploaded_file.stream)
-            image = image.convert("RGB")
+            image = Image.open(uploaded_file.stream).convert("RGB")
             response = get_gemini_response(input_text, image)
+        else:
+            response = get_gemini_response(input_text)
 
     return render_template("upload.html", response=response)
+
+
+# ✅ Chat Route (text only, includes memory from DB)
 @app.route("/get", methods=["POST"])
 def chat():
     if "username" not in session:
-        return {"error": "Unauthorized"}, 401
+        return jsonify({"error": "Unauthorized"}), 401
 
     try:
-        # Retrieve the user's message from the request
         msg = request.form.get("msg", "").strip()
-
-        # If there's no message, return a default response
         if not msg:
-            return {"response": "Hello! I'm your chatbot. Feel free to share how you're feeling, or ask any questions."}
+            return jsonify({"response": "Hello! I'm your chatbot. How are you feeling today?"})
 
         username = session["username"]
-        
-        # Connect to the database and retrieve the last few messages for context
+
+        # Fetch recent memory
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
-        # Retrieve the last 3 messages and responses for context
         cursor.execute("""
             SELECT message, response 
             FROM chatbot_memory 
@@ -1206,37 +1229,36 @@ def chat():
             ORDER BY timestamp DESC 
             LIMIT 3
         """, (username,))
-        
-        # Fetch memory (previous conversations) to provide context
         memory = cursor.fetchall()
         conn.close()
 
-        # Format the memory as a string to be passed to the AI model
-        memory_context = ""
-        for entry in memory:
-            memory_context += f"User: {entry['message']}\nBot: {entry['response']}\n"
-        
-        # Send the message along with memory context to the AI model for a more personalized response
-        response = ai.GenerativeModel("gemini-pro").start_chat().send_message(memory_context + msg)
+        # Combine memory with new message
+        memory_context = "\n".join(
+            [f"User: {m['message']}\nBot: {m['response']}" for m in memory]
+        )
+        full_prompt = f"{memory_context}\nUser: {msg}\nBot:"
 
-        # Save the new message and response to the database for future conversations
+        # Use gemini-2.0-flash (most available model)
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content(full_prompt)
+        reply_text = response.text.strip() if response.text else "Sorry, I couldn’t process that."
+
+        # Save conversation
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO chatbot_memory (username, message, response) 
+            INSERT INTO chatbot_memory (username, message, response)
             VALUES (%s, %s, %s)
-        """, (username, msg, response.text))
+        """, (username, msg, reply_text))
         conn.commit()
         conn.close()
 
-        # Return the chatbot's response
-        return {"response": response.text or "Sorry, I couldn't understand that."}
+        return jsonify({"response": reply_text})
 
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return {"error": "An error occurred while processing the request."}
-    
-    return render_template("chat1.html")
+        print("Chat error:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
 
 def evaluate_cognitive_function(score):
     if score is None:
