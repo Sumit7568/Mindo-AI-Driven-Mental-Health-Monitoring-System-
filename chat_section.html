@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talks Chatter</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-pzjw8f+ua7Kw1TIq0bW7e+qi0U8x2QFz58frYocXM30YWs6kjs5KvML5tO6IXx3b" crossorigin="anonymous">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+
+        .members-container {
+            width: 250px;
+            background-color: #f9f9f9;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .member {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e1e1e1;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .member:hover {
+            background-color: #ccc;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .chat-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .user-message {
+            background-color: #d1f7d1;
+            align-self: flex-start;
+        }
+
+        .bot-message {
+            background-color: #e1e1e1;
+            align-self: flex-end;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid chat-container">
+        <!-- Members List Section -->
+        <div class="members-container">
+            {% if members %}
+            {% for member in members %}
+            <div class="member" onclick="selectMember('{{ member }}')">{{ member }}</div>
+            {% endfor %}
+            {% else %}
+            <div class="no-members text-center">No members available</div>
+            {% endif %}
+        </div>
+
+        <!-- Chat Box Section -->
+        <div class="chat-box">
+            <div class="chat-header" id="chatHeader">Select a member to chat</div>
+            <div class="messages" id="messages">
+                <!-- Chat messages will appear here -->
+            </div>
+            <input type="text" id="userMessage" class="form-control" placeholder="Type a message...">
+            <button class="btn btn-success" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional for interactivity like modals, tooltips) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zyD0vM1g1sQdP7pVVX6B1MEp2l9V4FZXO2l5w4F" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0bW7e+qi0U8x2QFz58frYocXM30YWs6kjs5KvML5tO6IXx3b" crossorigin="anonymous"></script>
+
+   <!-- JavaScript section -->
+   <script>
+    let selectedMember = ''; // To track the selected member for chat
+
+    // Function to select a member to chat with
+    function selectMember(member) {
+        selectedMember = member; // Set the selected member
+        document.getElementById('chatHeader').textContent = `Chat with ${member}`; // Update chat header
+
+        // Fetch and display chat messages for the selected member
+        fetch('/fetch_messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `recipient=${encodeURIComponent(member)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = ''; // Clear previous messages
+
+            // Render each message
+            data.messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                if (msg.sender === 'bot') {
+                    messageDiv.classList.add('bot-message');
+                } else {
+                    messageDiv.classList.add('user-message');
+                }
+                messageDiv.textContent = msg.message;
+                messagesContainer.appendChild(messageDiv);
+            });
+
+            // Scroll to the bottom of the chat
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+    }
+
+    // Function to send a message
+    function sendMessage() {
+        const messageInput = document.getElementById('userMessage');
+        const message = messageInput.value;
+        if (!message || !selectedMember) return;
+
+        // Display the user's message
+        const messagesContainer = document.getElementById('messages');
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.classList.add('message', 'user-message');
+        userMessageDiv.textContent = message;
+        messagesContainer.appendChild(userMessageDiv);
+        messageInput.value = '';
+
+        // Send message to the Flask server
+        fetch('/send_message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `message=${encodeURIComponent(message)}&recipient=${encodeURIComponent(selectedMember)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.classList.add('message', 'bot-message');
+                botMessageDiv.textContent = data.response;
+                messagesContainer.appendChild(botMessageDiv);
+
+                // Scroll to the bottom of the chat
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } else {
+                const errorMessageDiv = document.createElement('div');
+                errorMessageDiv.classList.add('message', 'bot-message');
+                errorMessageDiv.textContent = "Failed to send message.";
+                messagesContainer.appendChild(errorMessageDiv);
+            }
+        });
+    }
+</script>
+
+
+</body>
+
+</html>
