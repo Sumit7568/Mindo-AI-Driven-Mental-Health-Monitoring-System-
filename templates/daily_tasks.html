@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Tasks</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,10 +25,11 @@
         .task-container {
             width: 50%;
             margin: 20px auto;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.85);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: left;
         }
 
         ul {
@@ -36,15 +38,18 @@
         }
 
         li {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-            color: #333;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        li.completed {
+            color: #6c757d;
         }
 
         input[type="checkbox"] {
             margin-right: 10px;
+            transform: scale(1.2);
         }
 
         .message {
@@ -69,58 +74,58 @@
             cursor: pointer;
         }
 
-        .buttons .submit-btn {
+        .submit-btn {
             background-color: #007BFF;
             color: white;
         }
 
-        .buttons .chat-btn {
+        .chat-btn {
             background-color: #28A745;
             color: white;
         }
 
-        .time-slot {
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #007BFF;
-        }
     </style>
 </head>
+
 <body>
-    <h1>Daily Tasks</h1>
 
-    {% if message %}
-        <div class="message {% if 'already' in message %}error{% endif %}">
-            {{ message }}
-        </div>
-    {% endif %}
+<h1>Daily Tasks</h1>
 
-    <form method="POST" action="{{ url_for('daily_tasks') }}">
-        <div class="task-container">
-            {% for task, description in tasks %}
-                <div class="time-slot">
-                    {% if loop.index <= 7 %}
-                        Morning Tasks (6 AM - 12 PM):
-                    {% elif loop.index <= 14 %}
-                        Afternoon/Night Tasks (12 PM - 10 PM):
-                    {% endif %}
-                </div>
-                <ul>
-                    <li>
-                        <label>
-                            <input type="checkbox" name="{{ task }}"> {{ loop.index }}. {{ description }}
-                        </label>
-                    </li>
-                </ul>
+{% if message %}
+    <div class="message">
+        {{ message }}
+    </div>
+{% endif %}
+
+<form method="POST" action="{{ url_for('daily_tasks') }}">
+
+    <div class="task-container">
+        <ul>
+            {% for code, label in tasks %}
+                <li class="{% if existing and existing[code] == 'on' %}completed{% endif %}">
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="{{ code }}"
+                            {% if existing and existing[code] == 'on' %}checked{% endif %}
+                        >
+                        {{ label }}
+                    </label>
+                </li>
             {% endfor %}
-        </div>
+        </ul>
+    </div>
 
-        <div class="buttons">
-            <button type="submit" class="submit-btn">Submit</button>
-            <a href="{{ url_for('index') }}">
-                <button type="button" class="chat-btn">Go to Chat</button>
-            </a>
-        </div>
-    </form>
+    <div class="buttons">
+        <button type="submit" class="submit-btn">
+            {% if existing %}Update Tasks{% else %}Submit{% endif %}
+        </button>
+        <a href="{{ url_for('index') }}">
+            <button type="button" class="chat-btn">Go to Chat</button>
+        </a>
+    </div>
+
+</form>
+
 </body>
 </html>

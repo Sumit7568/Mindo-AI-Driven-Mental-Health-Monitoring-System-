@@ -252,20 +252,26 @@ body {
         </div>
 
         <!-- Daily Task Status Section -->
-        <div class="daily-task-status">
-            <h2>Daily Task Status</h2>
-            <h3>Completed Daily Tasks</h3>
-            {% if completed_tasks %}
-                <ul>
-                    {% for task in completed_tasks %}
-                        <li>{{ task }}: Completed</li>
-                    {% endfor %}
-                </ul>
-                <p><strong>Submitted On:</strong> {{ timestamp }}</p>
-            {% else %}
-                <p>No daily tasks submitted yet.</p>
-            {% endif %}
-        </div>
+<div class="daily-task-status">
+    <h2>Daily Task Status</h2>
+    <h3>Today's Daily Tasks</h3>
+
+    {% if tasks_submitted_today %}
+        {% if completed_tasks %}
+            <ul>
+                {% for task in completed_tasks %}
+                    <li>{{ task }}: Completed</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You submitted today, but no tasks were marked complete.</p>
+        {% endif %}
+        <p><strong>Submitted On:</strong> {{ timestamp }}</p>
+    {% else %}
+        <p>You haven't submitted today's tasks yet.</p>
+        <a href="{{ url_for('daily_tasks') }}">Submit today's tasks</a>
+    {% endif %}
+</div>
 
         <!-- Mindo Community Section -->
         <div class="mindo-community">
@@ -369,31 +375,7 @@ body {
 </div>
 
 
-        <!-- Most Common Issues -->
-        <div class="most-common-issues">
-            <h3>Most Common Issues</h3>
-            <ul>
-                {% if common_issues %}
-                    {% for issue in common_issues %}
-                        <li>{{ issue }}</li>
-                    {% endfor %}
-                {% else %}
-                    <li>No common issues reported.</li>
-                {% endif %}
-            </ul>
-            <div class="overall-evaluation">
-                <h4>Social Diagnostics</h4>
-                {% if overall_evaluation %}
-                    <p>Overall Mental State: {{ overall_evaluation.overall_state }}</p>
-                {% else %}
-                    <p>No evaluation available for this user.</p>
-                {% endif %}
-            </div>
-            
-            
-        </div>
         
-    </div>
 
     <!-- Button Section -->
     <div class="button-group">
