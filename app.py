@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 import tensorflow as tf
 import requests
 import google.generativeai as genai
+import requests
+import os
+
 
 
 # Initialize Flask app and SocketIO
@@ -32,15 +35,7 @@ def get_db_connection():
         database="mindo"
     )
 
-# Retrieve API key from environment variable
-API_KEY = os.getenv('GOOGLE_API_KEY')
-
-
-genai.configure(api_key=API_KEY)
-
-# Create model object once
-model = genai.GenerativeModel("gemini-2.0-flash")  # ✅ latest supported text model
-
+OPENROUTER_API_KEY = "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"
 # Chat application variables
 rooms = {}
 
@@ -153,97 +148,6 @@ def exit_room():
     # Redirect the user to the community page
     return redirect(url_for("community"))
 
-def evaluate_overall_mental_state(username):
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
-        # Fetch reactions from the 'reactions' table for the given user (using 'appname' instead of 'name')
-        cursor.execute("SELECT reaction_type FROM reactions WHERE appname = %s", (username,))
-        reactions = cursor.fetchall()
-
-        # Log or print fetched reactions to see what data is returned
-        print(f"Fetched reactions for {username}: {reactions}")
-
-        if not reactions:
-            # If no reactions were found for the user, return an error
-            return {
-                "status": "error",
-                "message": f"No reactions found for user: {username}"
-            }
-
-        # Initialize counters for each reaction type
-        positive_count = 0
-        negative_count = 0
-        neutral_count = 0
-
-        # Categorize reactions based on reaction_type
-        for reaction in reactions:
-            reaction_type = reaction.get("reaction_type", "").lower()
-
-            # Positive reactions
-            if reaction_type in ["like", "love", "care"]:
-                positive_count += 1
-            # Negative reactions
-            elif reaction_type in ["angry", "sad", "wow"]:
-                negative_count += 1
-            # Neutral reactions
-            else:
-                neutral_count += 1
-
-        # Calculate total number of reactions
-        total_reactions = positive_count + negative_count + neutral_count
-
-        if total_reactions == 0:
-            # If no reactions are found, return a message
-            return {
-                "status": "error",
-                "message": f"No reactions found for user: {username}"
-            }
-
-        # Calculate percentages for each category
-        positive_percentage = (positive_count / total_reactions) * 100
-        negative_percentage = (negative_count / total_reactions) * 100
-        neutral_percentage = (neutral_count / total_reactions) * 100
-
-        # Determine the overall mental state based on majority reactions
-        overall_state = "Neutral"  # Default value
-        if positive_percentage > 60:
-            overall_state = "Positive"
-        elif negative_percentage > 60:
-            overall_state = "Negative"
-
-        # Return the evaluation result
-        return {
-            "status": "success",
-            "username": username,
-            "evaluation": {
-                "positive_percentage": positive_percentage,
-                "negative_percentage": negative_percentage,
-                "neutral_percentage": neutral_percentage,
-                "overall_state": overall_state
-            }
-        }
-
-    except mysql.connector.Error as e:
-        # Handle and log database errors
-        return {
-            "status": "error",
-            "message": f"Database error: {e}"
-        }
-    finally:
-        cursor.close()
-        conn.close()
-
-
-# Facebook API details
-page_id = '61571664276237'  # Your page ID
-post_id = '122100166154722142'  # Your post ID
-access_token = 'EAAVR1GpxE6MBO4JNq0ZAZATWoUsT8oaNKvp1ZAmAbmHNQdszycCJhgPAXqzAfMqxkCKbGoxc6VzxTkNJXawx7f5lGPsjETWcvvLxJUwmZAboIXGHKZCTR0mVPFfPYiLeDWIOuPv8GUOG7hq5AoEv1tJAMR7jQ6kV7wY7OSQOGlOZCd9KuglylaSLIwhe2YOeQZAKFFVtl37MsDVjVAq'
-
-# Comments and reactions URL
-comments_url = f'https://graph.facebook.com/v16.0/{page_id}_{post_id}/comments?access_token={access_token}'
-reactions_url = f'https://graph.facebook.com/v16.0/{page_id}_{post_id}/reactions?access_token={access_token}'
 
 # Functions to process comments and reactions
 def get_comment(comment):
@@ -263,66 +167,7 @@ def get_reaction(reaction):
 
 
 
-# Insert comments into MySQL database
-def insert_comment(cursor, comment, appname):
-    try:
-        # Use a query to insert the comment only if the user hasn't already commented on the post
-        cursor.execute(""" 
-            INSERT INTO comments (name, time, message, post_id, appname)
-            SELECT %s, %s, %s, %s, %s
-            WHERE NOT EXISTS (
-                SELECT 1 FROM comments WHERE name = %s AND post_id = %s
-            );
-        """, (comment['name'], comment['time'], comment['message'], post_id, appname, comment['name'], post_id))
-    except mysql.connector.Error as err:
-        print(f"Error inserting comment: {err}")
 
-# Insert reactions into MySQL database
-def insert_reaction(cursor, reaction, appname):
-    try:
-        cursor.execute("INSERT INTO reactions (name, reaction_type, appname) VALUES (%s, %s, %s)",
-                       (reaction['name'], reaction['reaction_type'], appname))
-    except mysql.connector.Error as err:
-        print(f"Error inserting reaction: {err}")
-
-# Function to fetch and store comments and reactions
-def fetch_and_store_data(appname):
-    try:
-        # Fetch comments and reactions
-        comments_response = requests.get(comments_url)
-        comments_data = comments_response.json()
-        
-        reactions_response = requests.get(reactions_url)
-        reactions_data = reactions_response.json()
-
-        conn = get_db_connection()
-        if conn:
-            cursor = conn.cursor()
-
-            # Process and insert comments into the database
-            if 'data' in comments_data:
-                for comment in comments_data['data']:
-                    comment_data = get_comment(comment)
-                    insert_comment(cursor, comment_data, appname)
-
-            # Process and insert reactions into the database
-            if 'data' in reactions_data:
-                for reaction in reactions_data['data']:
-                    reaction_data = get_reaction(reaction)
-                    insert_reaction(cursor, reaction_data, appname)
-
-            # Commit changes to the database
-            conn.commit()
-
-            # Close the cursor and connection
-            cursor.close()
-            conn.close()
-
-        print("Data fetched and stored successfully.")
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching data from Facebook API: {e}")
-    except mysql.connector.Error as e:
-        print(f"Database error: {e}")
 
 # Call the function to fetch and store data as soon as the app starts with the appname (logged-in user)
 #fetch_and_store_data(logged_in_user_name)  # Replace logged_in_user_name with the actual variable from your app
@@ -946,107 +791,75 @@ def get_activity_log(username):
 @app.route("/mental_health_success")
 def mental_health_success():
     return render_template("mental_health_success.html")
-def remove_outdated_tasks():
-    """Remove outdated tasks (tasks older than 1 day)."""
-    conn = None
-    cursor = None
-    try:
-        # Get a new database connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Execute the deletion query
-        cursor.execute("DELETE FROM dailytask WHERE timestamp < NOW() - INTERVAL 1 DAY")
-
-        # Commit the changes
-        conn.commit()
-
-        print("Outdated tasks removed successfully.")
-    except Exception as e:
-        print(f"Error while removing outdated tasks: {e}")
-    finally:
-        # Close the cursor and the connection if they were created
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
 
 
-# Call the function to remove outdated tasks
-remove_outdated_tasks()
+
+from datetime import date
+
+from datetime import date
 
 @app.route("/daily_tasks", methods=["GET", "POST"])
 def daily_tasks():
     if "username" not in session:
         return redirect(url_for("login"))
-    
+
     username = session["username"]
-    message = None  # Message to display if submission already exists
+    message = None
+    today = date.today().isoformat()
 
-    # Get the current day of the month
-    current_day = datetime.today().day
+    tasks = [
+        ("T1", "Meditate for 10 minutes"),
+        ("T2", "Drink 8 glasses of water"),
+        ("T3", "Exercise or go for a walk"),
+        ("T4", "Practice Gratitude"),
+        ("T5", "Set Your Intentions for the Day"),
+        ("T6", "Declutter Your Space"),
+        ("T7", "Spend Quality Time with Loved Ones")
+    ]
 
-    # Determine if it's an odd or even day
-    is_odd_day = current_day % 2 != 0
-
-    # Define the tasks for odd and even days (set1: T1-T7, set2: T8-T14)
-    if is_odd_day:
-        tasks = [
-            ("T1", "Meditate for 10 minutes"),
-            ("T2", "Drink 8 glasses of water"),
-            ("T3", "Exercise or go for a walk"),
-            ("T4", "Practice Gratitude"),
-            ("T5", "Set Your Intentions for the Day"),
-            ("T6", "Declutter Your Space"),
-            ("T7", "Spend Quality Time with Loved Ones")
-        ]  # Task set for odd days
-    else:
-        tasks = [
-            ("T8", "Journal Your Thoughts"),
-            ("T9", "Complete One Productive Task"),
-            ("T10", "Read for 15 minutes"),
-            ("T11", "Take a Digital Detox"),
-            ("T12", "Deep Breathing or Mindful Breathing"),
-            ("T13", "Eat a Balanced Meal"),
-            ("T14", "Reflect on the Day")
-        ]  # Task set for even days
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
 
     if request.method == "POST":
-        # Fetch checkbox values from the form
-        task_values = {}
-        for task in tasks:
-            task_values[task[0]] = "on" if request.form.get(task[0]) else "off"
+        task_values = {task[0]: ("on" if request.form.get(task[0]) else "off") for task in tasks}
 
         try:
-            # Insert the task completion into the database
-            conn = get_db_connection()
-            cursor = conn.cursor(dictionary=True)
-            
-            # Create the query dynamically based on the tasks
-            query = f"""INSERT INTO dailytask (username, {', '.join([task[0] for task in tasks])})
-                        VALUES (%s, {', '.join(['%s'] * len(tasks))})"""
-            cursor.execute(query, (username, *task_values.values()))
+            # ✅ Upsert: insert today's row if it doesn't exist,
+            # otherwise update the existing one for (username, today)
+            columns = ', '.join(t[0] for t in tasks)
+            placeholders = ', '.join(['%s'] * len(tasks))
+            update_clause = ', '.join(f"{t[0]} = VALUES({t[0]})" for t in tasks)
+
+            query = f"""
+                INSERT INTO dailytask (username, task_date, {columns})
+                VALUES (%s, %s, {placeholders})
+                ON DUPLICATE KEY UPDATE {update_clause}, timestamp = CURRENT_TIMESTAMP
+            """
+
+            cursor.execute(query, (username, today, *task_values.values()))
             conn.commit()
-            
-            message = "Your daily tasks have been submitted successfully."
 
-        except mysql.connector.errors.IntegrityError as e:
-            if "Duplicate entry" in str(e):
-                message = "You have already submitted your daily tasks for today."
-            else:
-                # Handle other integrity errors
-                message = "An error occurred while submitting your tasks."
+            message = "Your daily tasks have been updated successfully."
 
-        finally:
-            conn.close()
+        except mysql.connector.Error as e:
+            message = "An error occurred while submitting your tasks."
 
-    return render_template("daily_tasks.html", message=message, tasks=tasks)
+    # Fetch today's current state (after any POST, or for a fresh GET)
+    cursor.execute(
+        "SELECT * FROM dailytask WHERE username = %s AND task_date = %s",
+        (username, today)
+    )
+    existing = cursor.fetchone()
 
+    cursor.close()
+    conn.close()
 
-
-
-
-
+    return render_template(
+        "daily_tasks.html",
+        message=message,
+        tasks=tasks,
+        existing=existing
+    )
 @app.route("/suggestions")
 def suggestions():
     if "username" not in session:
@@ -1109,8 +922,7 @@ def login():
             session["user_email"] = user["email"]  # Store the email (if needed)
             
             # Fetch and store data for the logged-in user
-            fetch_and_store_data(username)  # Fetch and store data using the logged-in username
-            
+           
             # Redirect to the index (which renders chat1.html) after successful login
             return redirect(url_for("index"))
         else:
@@ -1160,51 +972,6 @@ def index():
         return redirect(url_for("login"))
     return render_template("chat1.html")
 
-# ✅ Gemini Response Function (text + image support)
-def get_gemini_response(input_text, image=None):
-    try:
-        model = genai.GenerativeModel("gemini-2.0-flash")  # ✅ stable & available model
-
-        if image:
-            # Convert PIL Image to byte array
-            img_byte_arr = BytesIO()
-            image.save(img_byte_arr, format="JPEG")
-            img_byte_arr.seek(0)
-
-            # Combine image + text in the request
-            contents = [
-                {"role": "user", "parts": [
-                    {"text": input_text},
-                    {"inline_data": {"mime_type": "image/jpeg", "data": img_byte_arr.read()}}
-                ]}
-            ]
-            response = model.generate_content(contents)
-        else:
-            response = model.generate_content(input_text)
-
-        return response.text or "No response from model."
-
-    except Exception as e:
-        print("Gemini error:", e)
-        return "Sorry, I couldn’t process your request."
-
-
-# ✅ Upload Route (text + image)
-@app.route("/upload", methods=["GET", "POST"])
-def upload():
-    response = None
-    if request.method == "POST":
-        input_text = request.form.get("input", "")
-        uploaded_file = request.files.get("image")
-
-        if uploaded_file:
-            image = Image.open(uploaded_file.stream).convert("RGB")
-            response = get_gemini_response(input_text, image)
-        else:
-            response = get_gemini_response(input_text)
-
-    return render_template("upload.html", response=response)
-
 
 # ✅ Chat Route (text only, includes memory from DB)
 @app.route("/get", methods=["POST"])
@@ -1236,12 +1003,42 @@ def chat():
         memory_context = "\n".join(
             [f"User: {m['message']}\nBot: {m['response']}" for m in memory]
         )
-        full_prompt = f"{memory_context}\nUser: {msg}\nBot:"
 
-        # Use gemini-2.0-flash (most available model)
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(full_prompt)
-        reply_text = response.text.strip() if response.text else "Sorry, I couldn’t process that."
+        full_prompt = f"""
+You are a supportive and empathetic mental health assistant.
+Previous conversation:
+{memory_context}
+
+User: {msg}
+Bot:
+"""
+
+        # 🔥 OpenRouter API call
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        }
+
+        data = {
+            "model": "openai/gpt-3.5-turbo",   # You can change model here
+            "messages": [
+                {"role": "system", "content": "You are a helpful mental health chatbot."},
+                {"role": "user", "content": full_prompt}
+            ]
+        }
+
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers=headers,
+            json=data
+        )
+
+        result = response.json()
+
+        if "choices" in result:
+            reply_text = result["choices"][0]["message"]["content"].strip()
+        else:
+            reply_text = "Sorry, I couldn’t process that."
 
         # Save conversation
         conn = get_db_connection()
@@ -1258,7 +1055,6 @@ def chat():
     except Exception as e:
         print("Chat error:", str(e))
         return jsonify({"error": "Internal server error"}), 500
-
 
 def evaluate_cognitive_function(score):
     if score is None:
@@ -1361,17 +1157,18 @@ def get_emotional_analysis(username):
     # Return the emotional data with descriptive levels
     return emotional_levels
 
+from datetime import date
+
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
     if "username" not in session:
         return redirect(url_for("login"))
 
     username = session["username"]
-    
-    # Fetch user data from the database
-    user_data = get_user_data(username)  # Adjust this as per your DB structure
-    
-    # Manual activity log data
+    today = date.today().isoformat()
+
+    user_data = get_user_data(username)
+
     activity = [
         {"date": "2024-12-10", "action": "Logged in to the system"},
         {"date": "2024-12-11", "action": "Updated profile information"},
@@ -1379,70 +1176,88 @@ def dashboard():
         {"date": "2024-12-13", "action": "Completed mental health assessment"},
         {"date": "2024-12-14", "action": "Reviewed mental health report"}
     ]
-    
-    # Fetch user responses from the database
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Fetch responses from the response table
-    cursor.execute("SELECT Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10 FROM response WHERE username = %s ORDER BY timestamp DESC LIMIT 1", (username,))
+    cursor.execute("""
+        SELECT Q1, Q2, Q3, Q4, Q5, Q6, Q7, Q8, Q9, Q10
+        FROM response
+        WHERE username = %s
+        ORDER BY timestamp DESC
+        LIMIT 1
+    """, (username,))
     responses = cursor.fetchone()
 
-    # Fetch cognitive function data from the response21 table
-    cursor.execute("SELECT cognitive_function_score, timestamp FROM response21 WHERE username = %s ORDER BY timestamp DESC LIMIT 1", (username,))
+    cursor.execute("""
+        SELECT cognitive_function_score, timestamp
+        FROM response21
+        WHERE username = %s
+        ORDER BY timestamp DESC
+        LIMIT 1
+    """, (username,))
     cognitive_data = cursor.fetchone()
 
-    # Fetch completed daily tasks from the database
-    cursor.execute(""" 
-    SELECT T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, timestamp 
-    FROM dailytask 
-    WHERE username = %s 
-    ORDER BY timestamp DESC LIMIT 1
-    """, (username,))
+    # ✅ UPDATED: fetch TODAY's row specifically, not just the most recent ever
+    cursor.execute("""
+        SELECT T1, T2, T3, T4, T5, T6, T7, task_date, timestamp
+        FROM dailytask
+        WHERE username = %s AND task_date = %s
+        LIMIT 1
+    """, (username, today))
     daily_tasks = cursor.fetchone()
 
-
-    # Fetch joined tasks from the community table
-    cursor.execute(""" 
-        SELECT task, organization 
-        FROM community 
+    cursor.execute("""
+        SELECT task, organization
+        FROM community
         WHERE username = %s
     """, (username,))
     joined_tasks = cursor.fetchall()
 
+    cursor.close()
     conn.close()
 
-    # Task descriptions mapped to checkbox values
     task_list = [
         "Meditate for 10 minutes",
-        "Exercise or go for a walk",
-        "Journal your thoughts",
         "Drink 8 glasses of water",
-        "Complete one productive task"
+        "Exercise or go for a walk",
+        "Practice Gratitude",
+        "Set Your Intentions for the Day",
+        "Declutter Your Space",
+        "Spend Quality Time with Loved Ones"
     ]
 
-    # Map "on" and "off" values to task names
     if daily_tasks:
-        task_statuses = [
-            task_list[i] if daily_tasks[f"T{i+1}"] == "on" else None
-            for i in range(5)
+        completed_tasks = [
+            task_list[i]
+            for i in range(7)
+            if daily_tasks[f"T{i+1}"] == "on"
         ]
-        completed_tasks = [task for task in task_statuses if task]
     else:
         completed_tasks = []
 
-    # If no responses, render with empty analysis and tasks
-    if not responses:
-        return render_template("dashboard.html", user_data=user_data, activity=activity, analysis=None, completed_tasks=completed_tasks, joined_tasks=joined_tasks, cognitive_data=None, cognitive_status=None, timestamp=None)
+    # ✅ lets the template say "you haven't submitted today" vs "0 tasks done today"
+    tasks_submitted_today = daily_tasks is not None
 
-    # Calculate scores based on responses
+    if not responses:
+        return render_template(
+            "dashboard.html",
+            user_data=user_data,
+            activity=activity,
+            analysis=None,
+            completed_tasks=completed_tasks,
+            tasks_submitted_today=tasks_submitted_today,
+            joined_tasks=joined_tasks,
+            cognitive_data=None,
+            cognitive_status=None,
+            timestamp=None
+        )
+
     depression_score = calculate_depression(responses["Q1"], responses["Q5"], responses["Q7"], responses["Q8"])
     anxiety_score = calculate_anxiety(responses["Q2"], responses["Q3"], responses["Q6"])
     anger_score = calculate_anger(responses["Q2"], responses["Q3"])
     loneliness_score = calculate_loneliness(responses["Q7"], responses["Q8"])
 
-    
-    # Evaluate mental health status
     analysis = {
         "depression": evaluate_condition(depression_score),
         "anxiety": evaluate_condition(anxiety_score),
@@ -1450,15 +1265,14 @@ def dashboard():
         "loneliness": evaluate_condition(loneliness_score)
     }
 
-
-    # Evaluate cognitive function status
     cognitive_status = None
     if cognitive_data and cognitive_data["cognitive_function_score"]:
-        cognitive_status = evaluate_cognitive_function(cognitive_data["cognitive_function_score"])
+        cognitive_status = evaluate_cognitive_function(
+            cognitive_data["cognitive_function_score"]
+        )
 
     emotional_analysis = get_emotional_analysis(username)
 
-    # Define common issues based on high mental health scores
     common_issues = []
 
     if analysis["depression"] == "High":
@@ -1469,33 +1283,21 @@ def dashboard():
         common_issues.append("Difficulty controlling anger or frustration.")
     if analysis["loneliness"] == "High":
         common_issues.append("Feeling disconnected or isolated from others.")
-    
-  # Evaluate the overall mental state based on reactions
-    overall_evaluation_result = evaluate_overall_mental_state(username)
-
-    overall_evaluation = None
-    if overall_evaluation_result["status"] == "success":
-        overall_evaluation = overall_evaluation_result["evaluation"]
-    else:
-        # Log the error message if evaluation fails
-        print(overall_evaluation_result["message"])
 
     return render_template(
-        "dashboard.html", 
-        user_data=user_data, 
-        activity=activity, 
+        "dashboard.html",
+        user_data=user_data,
+        activity=activity,
         analysis=analysis,
         emotional_analysis=emotional_analysis,
-        common_issues=common_issues,  # Ensure that common_issues is passed correctly
-        completed_tasks=completed_tasks, 
-        joined_tasks=joined_tasks, 
-        cognitive_data=cognitive_data,  
-        cognitive_status=cognitive_status, 
-        overall_evaluation=overall_evaluation, 
+        common_issues=common_issues,
+        completed_tasks=completed_tasks,
+        tasks_submitted_today=tasks_submitted_today,
+        joined_tasks=joined_tasks,
+        cognitive_data=cognitive_data,
+        cognitive_status=cognitive_status,
         timestamp=daily_tasks["timestamp"] if daily_tasks else None
     )
-
-
 @app.route("/feedback")
 def feedback():
     return render_template("feedback.html")
