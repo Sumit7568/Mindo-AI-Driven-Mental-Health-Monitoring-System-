@@ -1,84 +1,190 @@
-![Binaryhood](Logo/BinaryhoodLogo.png)
+# Mindo — Mental Health Support Platform
 
-# ChatBot
+A Flask-based mental health support platform combining an AI chatbot, structured mental health & cognitive assessments, daily wellness tasks, a peer community/chat system, emotional analytics dashboard, and emergency support resources.
+
+> ⚠️ **Security note:** the uploaded `app.py` contains a hardcoded OpenRouter API key and a plaintext `mysql` root connection with no password. Before deploying or pushing this to a public repo, move all secrets into a `.env` file (see [Environment Variables](#environment-variables) below) and **rotate the exposed API key immediately**, since it was committed in plain text.
+
+---
+
+## Features
+
+- 🔐 **Auth** — username/password login & registration (MySQL-backed)
+- 🤖 **AI Mental Health Chatbot** — supportive, non-diagnostic chatbot powered by an LLM via OpenRouter, with basic crisis-keyword detection that surfaces helpline guidance
+- 📝 **Mental health assessments** — multi-stage questionnaires scoring depression, anxiety, anger, and loneliness
+- 🧠 **Cognitive function assessment** — a second questionnaire scoring cognitive function and classifying impairment level
+- 📊 **Dashboard** — visualizes assessment history, cognitive status, emotional analysis, and daily task completion
+- ✅ **Daily wellness tasks** — a checklist of self-care habits (meditation, hydration, gratitude, etc.) tracked per day
+- 💬 **Chat rooms** — real-time messaging via Flask-SocketIO, with shareable room codes
+- 👥 **Community** — browse members, post messages, and join community tasks/organizations
+- 🚨 **Emergency support** — quick access to emergency contacts and an alert-sending endpoint
+- 🗣️ **Feedback** — simple feedback submission page
+
+---
+
+## Tech Stack
+
+- **Backend:** Flask, Flask-SocketIO
+- **Database:** MySQL (`mysql-connector-python`)
+- **AI Chatbot:** OpenRouter API (via `requests`) — model `openai/gpt-3.5-turbo`
+- **Other AI libs present:** `google-generativeai`, `tensorflow` (imported for future/extended functionality — see [Notes](#notes))
+- **Image handling:** Pillow (`PIL`)
+- **Config:** `python-dotenv`
+
+---
 
 ## Installation & Setup
 
-[Install Python] https://www.python.org/downloads/
+**[Install Python]** https://www.python.org/downloads/
 
-[Install pip]
+**[Install pip]**
 
-```
+```bash
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 ```
 
-```
+```bash
 python3 get-pip.py
 ```
 
 Ensure pip is installed by running the following command
 
-```
+```bash
 pip --version
 ```
 
 If you have Python & pip installed then check their version in the terminal or command line tools
 
-```
+```bash
 python3 --version
 ```
 
-```
+```bash
 pip --version
 ```
 
-## Installing Flask
+---
 
-In your terminal run the requirements.txt file using this pip
+## Clone the Repository
 
+```bash
+git clone https://github.com/<your-username>/Mindo.git
+cd Mindo
 ```
+
+---
+
+## Install Dependencies
+
+```bash
+pip install flask flask-socketio mysql-connector-python werkzeug pillow python-dotenv tensorflow requests google-generativeai
+```
+
+Or, if you maintain a `requirements.txt`:
+
+```bash
 pip install -r requirements.txt
 ```
 
-## Running ChatBot Application in Terminal
+---
 
-```
-cd into your directory
+## Database Setup
+
+This app expects a local MySQL database named `mindo` (or `mindot`, per the queries in `app.py`). At minimum, create tables for:
+
+- `mindot` — user accounts (`username`, `password`, `name`, `email`, `Gender`, `Age`, `Profession`)
+- `response` — mental health assessment answers + scores (`Q1`–`Q10`, `depression_score`, `anxiety_score`, `anger_score`, `loneliness_score`, `timestamp`)
+- `response21` — cognitive assessment results (`cognitive_function_score`, `cognitive_status`, `timestamp`)
+- `response3` — emotional analysis responses (`Q1`–`Q5`)
+- `dailytask` — daily task checklist (`T1`–`T7`, `task_date`, `timestamp`)
+- `community` — community task/organization sign-ups (`username`, `task`, `organization`)
+- `chat_messages` — direct messages (`sender`, `receiver`/`recipient`, `message`, `created_at`)
+
+```sql
+CREATE DATABASE mindo;
 ```
 
+> Update table/column names or add migrations as needed — the app currently expects these tables to already exist.
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root and **never commit it**:
+
+```bash
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=mindo
+FLASK_SECRET_KEY=generate_a_strong_random_secret
 ```
+
+Update `get_db_connection()` and the `OPENROUTER_API_KEY` reference in `app.py` to read from these environment variables via `os.getenv(...)` instead of being hardcoded.
+
+---
+
+## Usage
+
+```bash
 python3 app.py
 ```
 
-## What you will create
+The app runs with Flask-SocketIO on `http://127.0.0.1:5000` by default.
 
-In this tutorial, I will guide you through the process of building a chatbot that can carry out conversations with users using natural language processing.
+### Typical Flow
 
-To start, we will be using Microsoft DialoGPT, a pre-trained language model that can generate human-like responses to given prompts. We will be integrating DialoGPT with Flask, a popular Python web framework, to create a web application that can communicate with users via a chat interface.
+1. Register an account and log in
+2. Land on the chat/home page, where you can talk to the AI mental health assistant
+3. Complete the mental health and cognitive assessments (`/mental_health`, `/assessment2`, `/assessment3`)
+4. Check your **Dashboard** for scored results, emotional analysis, and daily task progress
+5. Complete daily wellness tasks (`/daily_tasks`)
+6. Join or start real-time chat rooms, or engage with the **Community** page
+7. Use the **Emergency** page for quick access to support contacts if needed
 
-For the frontend of our application, we will be using HTML, CSS, and JavaScript to create a visually appealing and interactive chat interface. Additionally, we will be using jQuery to handle the HTTP requests that are made to the backend server.
+---
 
-Throughout the tutorial, I will provide step-by-step instructions on how to set up your development environment, install the necessary dependencies, and create the required files and code for the application. I will also explain how to train and fine-tune the DialoGPT model to improve the accuracy of its responses.
-
-By the end of this tutorial, you will have a fully functional chatbot that can engage in conversations with users, and you will have gained valuable experience in using Microsoft DialoGPT, Flask, and web development technologies such as HTML, CSS, and JavaScript.
-
-# ChatBot Link
-
-The Chatbot is constructed using the Microsoft/DialoGPT-medium model.
-
-```
-https://huggingface.co/microsoft/DialoGPT-medium
-```
-
-# User-Html
+## Project Structure (expected)
 
 ```
-var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + user_input + '<span class="msg_time_send">'+ time +
-    '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
+Mindo/
+├── app.py                  # Main Flask app (routes, chatbot, assessments, dashboard)
+├── templates/
+│   ├── home1.html / room1.html      # Chat room UI
+│   ├── login.html / register.html
+│   ├── chat1.html                     # AI chatbot UI
+│   ├── mental_health.html / assessment2.html / assessment3.html
+│   ├── dashboard.html
+│   ├── daily_tasks.html
+│   ├── community.html / members.html / chat_section.html
+│   ├── profile.html / update_profile.html
+│   ├── guidelines.html / feedback.html / emergency.html
+│   └── suggestions.html / mental_health_success.html
+├── .env                     # Secrets (not committed)
+└── README.md
 ```
 
-# Bot-HTML
+---
 
-```
-var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + bot_response + '<span class="msg_time">' + time + '</span></div></div>';
-```
+## Notes
+
+- The chatbot's crisis-keyword detection is a **basic safety net**, not a substitute for real crisis intervention — consider integrating a proper crisis-response workflow and licensed helpline info for production use.
+- `tensorflow` and `google-generativeai` are imported but not currently wired into any route in the provided code — likely reserved for a planned feature (e.g. image-based mood detection or an alternate chatbot backend).
+- Passwords are currently compared in plaintext (`user["password"] == password`) — switch to hashed passwords (e.g. `werkzeug.security.generate_password_hash` / `check_password_hash`) before any real deployment.
+
+---
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+1. Fork the repo
+2. Create your feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes
+4. Push and open a PR
+
+---
+
+## License
+
+This project is licensed under the MIT License.
