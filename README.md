@@ -2,8 +2,6 @@
 
 A Flask-based mental health support platform combining an AI chatbot, structured mental health & cognitive assessments, daily wellness tasks, a peer community/chat system, emotional analytics dashboard, and emergency support resources.
 
-> ⚠️ **Security note:** the uploaded `app.py` contains a hardcoded OpenRouter API key and a plaintext `mysql` root connection with no password. Before deploying or pushing this to a public repo, move all secrets into a `.env` file (see [Environment Variables](#environment-variables) below) and **rotate the exposed API key immediately**, since it was committed in plain text.
-
 ---
 
 ## Features
