@@ -1,5 +1,7 @@
 # Mindo — Mental Health Support Platform
 
+<img width="1902" height="875" alt="image" src="https://github.com/user-attachments/assets/b31e6a1f-4953-4161-b0c3-ad7be89b1653" />
+
 A Flask-based mental health support platform combining an AI chatbot, structured mental health & cognitive assessments, daily wellness tasks, a peer community/chat system, emotional analytics dashboard, and emergency support resources.
 
 ---
